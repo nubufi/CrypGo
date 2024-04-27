@@ -1,25 +1,10 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/nubufi/CrypGo/crypto/symmetric/caesar"
-	"github.com/nubufi/CrypGo/data"
-)
+import "fmt"
 
 func main() {
-	plainText := "احبك نعمان"
-	alphabet := data.ArabicAlphabet
-
-	shift := 3
-
-	encryptedText, _ := caesar.Encrypt(alphabet, plainText, shift)
-
-	fmt.Print("Encrypted text: ")
-	fmt.Println(encryptedText)
-
-	decryptedText, _ := caesar.Decrypt(alphabet, encryptedText, shift)
-
-	fmt.Print("Decrypted text: ")
-	fmt.Println(decryptedText)
+	text := "Hello, 世界!"
+	for i, c := range text {
+		fmt.Println(i, c, string(c+3), string(100000+i))
+	}
 }

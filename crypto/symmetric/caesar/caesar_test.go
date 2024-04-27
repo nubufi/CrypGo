@@ -10,7 +10,7 @@ func TestEncrypt(t *testing.T) {
 	plainText := "HELLO World"
 	alphabet := data.EnglishAlphabet
 	shift := 3
-	result, _ := Encrypt(alphabet, plainText, shift)
+	result, _ := Encrypt(alphabet, plainText, shift, false)
 
 	if result != "khoor zruog" {
 		t.Errorf("Expected khoor zruog but got %s", result)
@@ -21,7 +21,7 @@ func TestDecrypt(t *testing.T) {
 	encryptedText := "khoor zruog"
 	alphabet := data.EnglishAlphabet
 	shift := 3
-	result, _ := Decrypt(alphabet, encryptedText, shift)
+	result, _ := Decrypt(alphabet, encryptedText, shift, false)
 
 	if result != "hello world" {
 		t.Errorf("Expected hello world but got %s", result)

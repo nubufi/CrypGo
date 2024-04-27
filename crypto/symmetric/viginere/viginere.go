@@ -1,4 +1,4 @@
-package caesar
+package viginere
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"github.com/nubufi/CrypGo/utils"
 )
 
-// Encrypt applies the Caesar cipher to the given plainText using the provided shift value.
-// It returns the encrypted text and an error if the character is not found in the alphabet.
+// Encrypt applies the Viginere cipher to the given plainText using the provided key.
+// It returns the encrypted text and an error if any character in the plainText or the key is not found in the alphabet.
 //
 // Parameters:
 //
@@ -15,7 +15,7 @@ import (
 //
 // - plainText: The text to be encrypted.
 //
-// - shift: The number of positions to shift each character in the plainText.
+// - key: The key to be used for encryption.
 //
 // - ignoreUnknown: A boolean value to determine whether to ignore unknown characters in the plainText.
 // if set to true, unknown characters will be left as is in the encrypted text else an error will be returned.
@@ -28,11 +28,12 @@ import (
 //
 // Example:
 //
-// - encryptedText, err := caesar.Encrypt("abcdefghijklmnopqrstuvwxyz", "hello", 3,true)
-func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string, error) {
+// - encryptedText, err := viginere.Encrypt("abcdefghijklmnopqrstuvwxyz", "hello", "secret", true)
+func Encrypt(alphabet, plainText string, key string, ignoreUnknown bool) (string, error) {
 	encryptedText := ""
 	alphRune := []rune(alphabet)
 
+	n := 0
 	for _, char := range plainText {
 		currentIndex := utils.IndexOfRune(alphRune, char)
 		if currentIndex == -1 {
@@ -42,18 +43,23 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 			}
 			return "", fmt.Errorf("character %s not found in alphabet", string(char))
 		}
+		shift := utils.IndexOfRune(alphRune, rune(key[n%len(key)]))
+
+		if shift == -1 {
+			return "", fmt.Errorf("character %s not found in alphabet", string(char))
+		}
 		encryptedIndex := (currentIndex + shift) % len(alphRune)
 
 		encryptedText += string(alphRune[encryptedIndex])
-
+		n += 1
 	}
 
 	return encryptedText, nil
 }
 
-// Decrypt takes an alphabet, encrypted text, and a shift value as input and returns the decrypted text.
-// It uses the Caesar cipher algorithm to decrypt the text by shifting each character in the encrypted text
-// backwards by the specified shift value. The decrypted text is returned along with an error, if any.
+// Decrypt takes an alphabet, encrypted text, and a key as input and returns the decrypted text.
+// It uses the Viginere cipher algorithm to decrypt the text by shifting each character in the encrypted text
+// backwards. The decrypted text is returned along with an error, if any.
 //
 // Parameters:
 //
@@ -61,7 +67,7 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 //
 // - encryptedText: The text to be decrypted.
 //
-// - shift: The number of positions to shift each character in the encrypted text.
+// - key: The key to be used for decryption.
 //
 // - ignoreUnknown: A boolean value to determine whether to ignore unknown characters in the plainText.
 // if set to true, unknown characters will be left as is in the encrypted text else an error will be returned.
@@ -74,16 +80,13 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 //
 // Example:
 //
-// - decryptedText, err := caesar.Decrypt("abcdefghijklmnopqrstuvwxyz", "khoor", 3,true)
-func Decrypt(alphabet, encryptedText string, shift int, ignoreUnknown bool) (string, error) {
+// - decryptedText, err := viginere.Decrypt("abcdefghijklmnopqrstuvwxyz", "khoor", "secret",true)
+func Decrypt(alphabet, encryptedText string, key string, ignoreUnknown bool) (string, error) {
 	decryptedText := ""
 	alphRune := []rune(alphabet)
 
+	n := 0
 	for _, char := range encryptedText {
-		if char == ' ' {
-			decryptedText += " "
-			continue
-		}
 		currentIndex := utils.IndexOfRune(alphRune, char)
 		if currentIndex == -1 {
 			if ignoreUnknown {
@@ -92,12 +95,19 @@ func Decrypt(alphabet, encryptedText string, shift int, ignoreUnknown bool) (str
 			}
 			return "", fmt.Errorf("character %s not found in alphabet", string(char))
 		}
+		shift := utils.IndexOfRune(alphRune, rune(key[n%len(key)]))
+		if shift == -1 {
+			return "", fmt.Errorf("character %s not found in alphabet", string(char))
+		}
+
 		decryptedIndex := (currentIndex - shift) % len(alphRune)
 
 		if decryptedIndex < 0 {
 			decryptedIndex += len(alphRune)
 		}
 		decryptedText += string(alphRune[decryptedIndex])
+		n += 1
+
 	}
 
 	return decryptedText, nil

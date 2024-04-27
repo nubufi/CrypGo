@@ -1,4 +1,4 @@
-package caesar
+package otp
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"github.com/nubufi/CrypGo/utils"
 )
 
-// Encrypt applies the Caesar cipher to the given plainText using the provided shift value.
-// It returns the encrypted text and an error if the character is not found in the alphabet.
+// Encrypt applies the One Time Path algorithm to the given plainText using the provided key.
+// It returns the encrypted text and an error if any character in the plainText or the key is not found in the alphabet.
 //
 // Parameters:
 //
@@ -15,7 +15,7 @@ import (
 //
 // - plainText: The text to be encrypted.
 //
-// - shift: The number of positions to shift each character in the plainText.
+// - key: The random sequence of number of positions to shift each character in the plainText.
 //
 // - ignoreUnknown: A boolean value to determine whether to ignore unknown characters in the plainText.
 // if set to true, unknown characters will be left as is in the encrypted text else an error will be returned.
@@ -28,12 +28,16 @@ import (
 //
 // Example:
 //
-// - encryptedText, err := caesar.Encrypt("abcdefghijklmnopqrstuvwxyz", "hello", 3,true)
-func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string, error) {
-	encryptedText := ""
+// - randomSequence := otp.RandomSequence("hello", 26)
+// - encryptedText, err := otp.Encrypt("abcdefghijklmnopqrstuvwxyz", "hello", randomSequence, true)
+func Encrypt(alphabet, plainText string, key []int, ignoreUnknown bool) (string, error) {
+	if len(plainText) != len(key) {
+		return "", fmt.Errorf("text and key must have the same length")
+	}
 	alphRune := []rune(alphabet)
 
-	for _, char := range plainText {
+	encryptedText := ""
+	for i, char := range plainText {
 		currentIndex := utils.IndexOfRune(alphRune, char)
 		if currentIndex == -1 {
 			if ignoreUnknown {
@@ -42,17 +46,15 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 			}
 			return "", fmt.Errorf("character %s not found in alphabet", string(char))
 		}
-		encryptedIndex := (currentIndex + shift) % len(alphRune)
 
+		encryptedIndex := (currentIndex + key[i]) % len(alphRune)
 		encryptedText += string(alphRune[encryptedIndex])
-
 	}
-
 	return encryptedText, nil
 }
 
-// Decrypt takes an alphabet, encrypted text, and a shift value as input and returns the decrypted text.
-// It uses the Caesar cipher algorithm to decrypt the text by shifting each character in the encrypted text
+// Decrypt takes an alphabet, encrypted text, and a key as input and returns the decrypted text.
+// It uses the One Time Path algorithm to decrypt the text by shifting each character in the encrypted text
 // backwards by the specified shift value. The decrypted text is returned along with an error, if any.
 //
 // Parameters:
@@ -61,7 +63,7 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 //
 // - encryptedText: The text to be decrypted.
 //
-// - shift: The number of positions to shift each character in the encrypted text.
+// - key: The random sequence of number of positions to shift each character in the plainText.
 //
 // - ignoreUnknown: A boolean value to determine whether to ignore unknown characters in the plainText.
 // if set to true, unknown characters will be left as is in the encrypted text else an error will be returned.
@@ -74,12 +76,16 @@ func Encrypt(alphabet, plainText string, shift int, ignoreUnknown bool) (string,
 //
 // Example:
 //
-// - decryptedText, err := caesar.Decrypt("abcdefghijklmnopqrstuvwxyz", "khoor", 3,true)
-func Decrypt(alphabet, encryptedText string, shift int, ignoreUnknown bool) (string, error) {
+// - randomSequence := otp.RandomSequence("hello", 26)
+// - decryptedText, err := caesar.Decrypt("abcdefghijklmnopqrstuvwxyz", randomSequence, 3,true)
+func Decrypt(alphabet, encryptedText string, key []int, ignoreUnknown bool) (string, error) {
+	if len(encryptedText) != len(key) {
+		return "", fmt.Errorf("text and key must have the same length")
+	}
 	decryptedText := ""
 	alphRune := []rune(alphabet)
 
-	for _, char := range encryptedText {
+	for i, char := range encryptedText {
 		if char == ' ' {
 			decryptedText += " "
 			continue
@@ -92,7 +98,7 @@ func Decrypt(alphabet, encryptedText string, shift int, ignoreUnknown bool) (str
 			}
 			return "", fmt.Errorf("character %s not found in alphabet", string(char))
 		}
-		decryptedIndex := (currentIndex - shift) % len(alphRune)
+		decryptedIndex := (currentIndex - key[i]) % len(alphRune)
 
 		if decryptedIndex < 0 {
 			decryptedIndex += len(alphRune)
